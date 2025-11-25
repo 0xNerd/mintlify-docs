@@ -1,97 +1,88 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Welcome to ZK Send"
+description: "Docs for the Telegram bot that delivers private SOL transfers"
 ---
 
-## Setting up
+## Why ZK Send
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
+ZK Send wraps Privacy Cash, Privy, and Supabase into a Telegram-native experience so anyone can move SOL privately without touching a browser extension.
 
 <Columns cols={2}>
   <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
+    title="Start building"
+    icon="rocket"
+    href="/quickstart"
+    horizontal
   >
-    Edit your docs locally and preview them in real time.
+    Provision env vars, seed Supabase, and run the bot locally in under 10 minutes.
   </Card>
   <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
+    title="Get started"
+    icon="rocket"
+    href="/getting-started"
   >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+    Learn how to use ZK Send and send your first private SOL transfer.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## Core capabilities
 
-Everything you need to create world-class documentation.
+<Columns cols={3}>
+  <Card title="Private transfers" icon="lock">
+    `/send` turns deposits → Privacy Cash proofs → withdrawals into a single user command.
+  </Card>
+  <Card title="Wallet orchestration" icon="wallet">
+    Embedded Privy wallets with import + export flows keep custody simple but secure.
+  </Card>
+  <Card title="Operational visibility" icon="chart-line">
+    Supabase captures audit-grade logs for deposits, withdrawals, and in-flight sends.
+  </Card>
+</Columns>
+
+## Architecture at a glance
+
+- **Telegram handlers** orchestrate conversations, inline keyboards, and deduplicated callbacks.
+- **Service layer** coordinates Privy wallets, Privacy Cash notes, and Supabase persistence.
+- **Middleware** provides auth, rate limits, and structured logging.
+- **Clients** wrap third-party SDKs so credentials and retries are centralized.
+
+<Card
+  title="Dig into the runtime"
+  icon="diagram-project"
+  href="/development"
+>
+  Learn how the bot boots, how background jobs are scheduled, and how to deploy safely.
+</Card>
+
+## Choose your next step
 
 <Columns cols={2}>
   <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
+    title="Getting Started"
+    icon="rocket"
+    href="/getting-started"
   >
-    Use MDX to style your docs pages.
+    Everything you need to know to start using ZK Send.
   </Card>
   <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
+    title="FAQ"
+    icon="circle-question"
+    href="/faq"
   >
-    Add sample code to demonstrate how to use your product.
+    Frequently asked questions about ZK Send, wallets, and transfers.
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Send SOL privately"
+    icon="paper-plane"
+    href="/commands/send"
   >
-    Display images and other media.
+    Learn how to use the `/send` command for private transfers.
   </Card>
   <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
+    title="Manage wallets"
+    icon="wallet"
+    href="/commands/wallets"
   >
-    Write once and reuse across your docs.
+    View, switch, and export your linked Privy wallets.
   </Card>
 </Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>

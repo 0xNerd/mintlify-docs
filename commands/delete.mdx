@@ -1,0 +1,63 @@
+---
+title: "/delete"
+description: "Remove your ZK Send account (Privy data preserved for recovery)"
+---
+
+## Overview
+
+The `/delete` command soft-deletes your ZK Send account. Your Privy wallet data remains intact, so you can return later without losing funds.
+
+## What gets deleted
+
+- **Supabase profile**: Your user record is marked as `status = 'deleted'`
+- **Active sessions**: All active bot sessions are revoked
+- **In-flight jobs**: Any pending transfers or background jobs are cancelled
+
+## What's preserved
+
+- **Privy wallets**: All wallet data remains in Privy's custody
+- **Transaction history**: Historical transfers are retained for compliance (2-year retention)
+- **Recovery path**: You can restore your account by running `/start` again
+
+<Info>
+  This is a soft delete. Your data is marked as deleted but not permanently removed, allowing for account recovery.
+</Info>
+
+## Account recovery
+
+If you delete your account and want to return:
+
+1. Run `/start` in Telegram
+2. The bot will restore your Privy session
+3. Your wallets and transaction history will be available again
+
+<Note>
+  Recovery works because Privy data is preserved. If you also delete your Privy account separately, recovery won't be possible.
+</Note>
+
+## Confirmation
+
+The bot will ask you to confirm before deleting. This is a safety measure to prevent accidental deletions.
+
+## When to use
+
+Consider deleting your account if:
+
+- You no longer want to use ZK Send
+- You're concerned about account security
+- You want to start fresh (though you can also just switch wallets)
+
+<Warning>
+  Deleting your account will cancel any in-flight transfers. Wait for active transfers to complete before deleting.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Can't delete account">
+    Ensure you're using the correct Telegram account that owns the ZK Send profile. Contact support if deletion fails.
+  </Accordion>
+  <Accordion title="Want to recover deleted account">
+    Simply run `/start` again. Your Privy session will be restored automatically.
+  </Accordion>
+</AccordionGroup>

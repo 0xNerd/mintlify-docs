@@ -1,0 +1,50 @@
+---
+title: "/balance"
+description: "Check the on-chain SOL balance for your active wallet"
+---
+
+## Overview
+
+The `/balance` command shows the current SOL balance of your active wallet by querying the Solana blockchain directly.
+
+## How it works
+
+- Queries the Solana RPC endpoint configured via `SOLANA_RPC_URL`
+- Displays the balance in SOL with up to 9 decimal places
+- Includes a "Refresh" button to fetch the latest balance (bypasses cache)
+
+<Info>
+  Balances are cached for 30 seconds by default (configurable via `BALANCE_CACHE_TTL`) to avoid overwhelming the RPC endpoint.
+</Info>
+
+## Usage
+
+Simply send `/balance` in your Telegram chat with the bot. The bot will respond with:
+
+- Your active wallet address
+- Current SOL balance
+- Last updated timestamp
+- A "Refresh" button to get the latest balance
+
+## What affects your balance
+
+- **Incoming transfers**: SOL sent to your wallet address
+- **Outgoing transfers**: SOL sent via `/send` (includes Privacy Cash fees)
+- **Network fees**: Small fees for on-chain transactions
+
+<Note>
+  The balance shown is your on-chain balance. If you have funds in Privacy Cash notes (mid-transfer), they won't appear here until the withdrawal completes.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Balance shows 0 but I know I have SOL">
+    - Click "Refresh" to bypass the cache
+    - Verify you're looking at the correct wallet with `/wallets`
+    - Check if you have funds in Privacy Cash notes (mid-transfer state)
+  </Accordion>
+  <Accordion title="RPC error or timeout">
+    The bot may be experiencing RPC issues. Try again in a few moments, or contact support if the problem persists.
+  </Accordion>
+</AccordionGroup>

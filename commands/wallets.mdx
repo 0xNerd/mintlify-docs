@@ -1,0 +1,68 @@
+---
+title: "/wallets"
+description: "View, switch, activate, and export your linked Privy wallets"
+---
+
+## Overview
+
+The `/wallets` command displays all wallets linked to your account and lets you manage them through inline keyboards.
+
+## What you can do
+
+- **View all wallets**: See every Privy wallet attached to your Telegram account
+- **Activate a wallet**: Switch which wallet is used for `/send` and `/balance`
+- **Export a wallet**: Get the private key for embedded wallets (sent as self-destructing message)
+- **Delete a wallet**: Remove a wallet from your account (Privy data preserved)
+
+## Wallet display
+
+For each wallet, you'll see:
+
+- Wallet address (truncated for readability)
+- Current SOL balance (cached, with refresh option)
+- Activation status (which wallet is currently active)
+- Last activity timestamp
+
+## Activating a wallet
+
+Only one wallet can be active at a time. The active wallet is used for:
+
+- `/balance` queries
+- `/send` transfers
+- Default wallet operations
+
+<Note>
+  The inline keyboard disables the "Activate" button for the wallet that's already active.
+</Note>
+
+## Exporting wallets
+
+For embedded Privy wallets, you can export the private key:
+
+- The key is sent as a self-destructing message (auto-deletes after a configured interval)
+- Exports are logged with partial fingerprints for audit purposes
+- Use this if you need to import the wallet into another application
+
+<Warning>
+  Exported private keys are sensitive. Store them securely and never share them. The bot auto-deletes the message, but Telegram may retain it briefly.
+</Warning>
+
+## Wallet limits
+
+There is no enforced wallet limit, but pruning unused wallets keeps the UI responsive.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Can't see my wallet">
+    - Make sure you've run `/start` to initialize your account
+    - Check if the wallet was deleted (deleted wallets are hidden)
+    - Try refreshing the list
+  </Accordion>
+  <Accordion title="Activation not working">
+    Ensure you're clicking the "Activate" button for the correct wallet. The bot will confirm the switch.
+  </Accordion>
+  <Accordion title="Export failed">
+    Only embedded Privy wallets can be exported. Imported wallets are wrapped by Privy and cannot be exported through the bot.
+  </Accordion>
+</AccordionGroup>

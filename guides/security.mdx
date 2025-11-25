@@ -1,0 +1,60 @@
+---
+title: "Security"
+description: "Custody model, data handling, and operational safeguards"
+---
+
+## Custody boundaries
+
+- **Privy**: Owns key generation, encryption, and signing in their TEE. The bot only requests signatures.
+- **Privacy Cash**: Holds deposits temporarily to create private notes. Notes are single-use and expire per `PRIVACY_CASH_NOTE_TTL`.
+- **ZK Send bot**: Stores metadata (never raw keys) plus operational logs in Supabase.
+
+<Warning>
+  Never bypass Privy by handling raw private keys yourself. Imports must immediately hand the key to Privy for re-encryption.
+</Warning>
+
+## Data storage
+
+| Data type | Location | Retention |
+| --------- | -------- | --------- |
+| Wallet metadata | Supabase `wallets` | 1 year or until user requests deletion |
+| Transfer logs | Supabase `private_transfers` | 2 years for compliance |
+| Error payloads | Supabase `transfer_errors` | 30 days |
+| Telegram chat IDs | Supabase `users` | Until `/delete` |
+
+Enable Supabase RLS policies (examples in `src/database/schema.sql`) to ensure only service roles can read/write sensitive tables.
+
+## Secrets
+
+- Store env files in a secrets manager (1Password, Doppler, Vault, etc.).
+- Refresh `PRIVACY_CASH_API_KEY`, `SUPABASE_SERVICE_KEY`, and Privy secrets quarterly.
+- Limit who can read `.env.production` in CI.
+
+## Telegram hygiene
+
+- Force HTTPS for webhooks; set `WEBHOOK_URL` to an origin with TLS 1.2+.
+- Enable IP allowlisting so only Telegram can reach the webhook endpoint.
+- Use `setMyCommands` to ensure the command list remains accurate and avoids typosquat commands.
+
+## Logging
+
+- `pino` scrubs PII by default, but double-check custom fields.
+- Use `LOG_SENSITIVE_FIELDS` to declare keys that must be redacted automatically.
+- Send logs to a SIEM (Datadog, Splunk, etc.) for long-term retention.
+
+## Access controls
+
+- CICD deploy keys should be scoped to a single repo.
+- Ops dashboard access (Grafana, Supabase) must use SSO + MFA.
+- Keep an on-call rotation so incidents have a clear owner.
+
+## Threat model highlights
+
+1. **Telegram account takeover** → Mitigate with `/delete` workflows and user education.
+2. **RPC spoofing** → Pin `SOLANA_RPC_URL` to a trusted provider, enable TLS certificate pinning when possible.
+3. **SDK drift** → Lock Privacy Cash + Privy versions via `package-lock.json`.
+4. **Database exfiltration** → Enforce RLS, daily backups, and network rules.
+
+<Note>
+  Review this document quarterly and after every significant feature launch.
+</Note>

@@ -1,0 +1,110 @@
+---
+title: "FAQ"
+description: "Frequently asked questions about ZK Send"
+---
+
+## General
+
+<AccordionGroup>
+<Accordion title="What is ZK Send?">
+ZK Send is a Telegram bot that enables private SOL transfers using zero-knowledge proofs. It combines Privy for secure wallet custody with Privacy Cash for private transfers.
+</Accordion>
+
+<Accordion title="How do private transfers work?">
+When you send SOL, the bot deposits it into Privacy Cash, generates a zero-knowledge proof that hides the sender, recipient, and amount, then withdraws to your recipient. This makes the transfer private on-chain.
+</Accordion>
+
+<Accordion title="Is ZK Send safe to use?">
+Yes. Private keys are managed by Privy in their Trusted Execution Environment (TEE). The bot only has permission to request signatures, never to see or store raw keys. All transfers are logged for audit purposes.
+</Accordion>
+
+<Accordion title="What fees does ZK Send charge?">
+ZK Send doesn't charge fees, but Privacy Cash charges fees for deposits, proof generation, and withdrawals. These fees are automatically deducted from your balance.
+</Accordion>
+</AccordionGroup>
+
+## Wallets
+
+<AccordionGroup>
+<Accordion title="Do I need to create a new wallet?">
+No. You can use the embedded Privy wallet created automatically, or import an existing Solana wallet with `/import`.
+</Accordion>
+
+<Accordion title="Can I use multiple wallets?">
+Yes. You can link multiple wallets to your account. Use `/wallets` to view, switch, and manage them.
+</Accordion>
+
+<Accordion title="Can I export my wallet?">
+Yes, for embedded Privy wallets. Use `/wallets` and click "Export" for the wallet you want. The private key is sent as a self-destructing message.
+</Accordion>
+
+<Accordion title="What happens if I delete my account?">
+Your ZK Send account is soft-deleted, but your Privy wallets remain intact. You can restore your account by running `/start` again.
+</Accordion>
+</AccordionGroup>
+
+## Transfers
+
+<AccordionGroup>
+<Accordion title="How long do transfers take?">
+Transfers typically complete in 1-3 minutes. The process includes deposit, proof generation, and withdrawal.
+</Accordion>
+
+<Accordion title="What if a transfer fails?">
+The bot will show an error message and provide a "Retry" button. Failed transfers are logged for debugging. Contact support if retries don't work.
+</Accordion>
+
+<Accordion title="Can I cancel a transfer?">
+Once a transfer is initiated, it cannot be cancelled. The bot will complete the deposit, proof generation, and withdrawal automatically.
+</Accordion>
+
+<Accordion title="What's the minimum transfer amount?">
+There's no minimum, but you need enough SOL to cover the transfer amount plus Privacy Cash fees. Use the `MAX` button to see the maximum sendable amount.
+</Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+<Accordion title="The bot isn't responding">
+- Check your internet connection
+- Try running `/start` to reset your session
+- Contact support if the issue persists
+</Accordion>
+
+<Accordion title="My balance shows 0 but I know I have SOL">
+- Click "Refresh" in the balance message
+- Verify you're looking at the correct wallet with `/wallets`
+- Check if funds are in Privacy Cash notes (mid-transfer state)
+</Accordion>
+
+<Accordion title="I can't import my wallet">
+- Ensure your private key is base58-encoded
+- Check that you haven't hit the wallet limit
+- Verify the wallet address isn't blocked
+</Accordion>
+
+<Accordion title="How do I contact support?">
+Run `/help` in the bot for a support button, or email `ops@zksend.app` directly.
+</Accordion>
+</AccordionGroup>
+
+## Privacy & Security
+
+<AccordionGroup>
+<Accordion title="Who can see my transfers?">
+Transfers are private on-chain thanks to zero-knowledge proofs. Only you and the recipient know about the transfer. The bot logs transactions for operational purposes, but these logs are secured.
+</Accordion>
+
+<Accordion title="Are my private keys safe?">
+Yes. Private keys are managed by Privy in their TEE. The bot never sees or stores raw keys. When you import a wallet, the key is immediately passed to Privy for secure re-encryption.
+</Accordion>
+
+<Accordion title="What data does ZK Send store?">
+The bot stores wallet metadata, transaction logs, and error logs in Supabase. Private keys are never stored—they're managed by Privy.
+</Accordion>
+
+<Accordion title="Can I delete my data?">
+Yes. Run `/delete` to soft-delete your account. Transaction logs are retained for 2 years for compliance, but your active account is removed.
+</Accordion>
+</AccordionGroup>

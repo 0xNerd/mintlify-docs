@@ -1,0 +1,98 @@
+---
+title: "Getting Started"
+description: "Everything you need to know to start using ZK Send"
+---
+
+## Welcome to ZK Send
+
+ZK Send is a Telegram bot that lets you send SOL privately using zero-knowledge proofs. Your funds are secured by Privy's trusted execution environment, and transfers are made private through Privacy Cash.
+
+## Quick start
+
+<Steps>
+<Step title="Start the bot">
+Open Telegram and send `/start` to the ZK Send bot. This initializes your account and creates or restores your Privy wallet.
+</Step>
+<Step title="Set up your wallet">
+- `/start` lets first-time users choose between keeping the freshly generated embedded wallet or importing an existing key inline
+- You can revisit `/import` later to add more wallets
+</Step>
+<Step title="Check your balance">
+Run `/balance` to see your current SOL balance.
+</Step>
+<Step title="Send SOL privately">
+Use `/send` to transfer SOL. The bot handles the entire privacy flow automatically.
+</Step>
+</Steps>
+
+## Key concepts
+
+### Private transfers
+
+When you send SOL via `/send`, the bot:
+
+1. Deposits your SOL into Privacy Cash
+2. Generates a zero-knowledge proof
+3. Withdraws to your recipient
+
+This makes the transfer private—the recipient and amount are hidden on-chain.
+
+### Wallet custody
+
+- **Privy manages your keys**: Private keys are stored in Privy's TEE (Trusted Execution Environment)
+- **Bot has signer permissions only**: The bot can request signatures but never sees your raw keys
+- **You can export**: Embedded wallets can be exported if needed
+
+### Multi-wallet support
+
+You can link multiple wallets to your account:
+
+- View all wallets with `/wallets`
+- Switch the active wallet anytime
+- Each wallet is managed independently
+
+## Common workflows
+
+<CardGroup cols={2}>
+<Card title="First-time user" icon="user-plus">
+1. Run `/start` (choose embedded wallet or inline import)
+2. Optional: Add more wallets later with `/import`
+3. Check `/balance`
+4. Send SOL with `/send`
+</Card>
+
+<Card title="Returning user" icon="arrow-rotate-right">
+1. Run `/start` to restore your session
+2. Check `/wallets` to see your wallets
+3. Activate the wallet you want to use
+4. Continue sending with `/send`
+</Card>
+
+<Card title="Managing wallets" icon="wallet">
+1. Use `/wallets` to see all linked wallets
+2. Click "Activate" to switch wallets
+3. Use "Export" to get a private key (embedded wallets only)
+4. Use "Delete" to remove a wallet
+</Card>
+
+<Card title="Troubleshooting" icon="wrench">
+1. Run `/start` to reset your session
+2. Check `/balance` to verify your wallet
+3. Use `/help` for command reference
+4. Contact support if issues persist
+</Card>
+</CardGroup>
+
+## Security best practices
+
+- **Never share private keys**: The bot auto-deletes imported keys, but be careful
+- **Verify recipient addresses**: Double-check addresses before sending
+- **Use secure devices**: Access the bot from trusted devices only
+- **Monitor your balance**: Check `/balance` regularly to catch unauthorized activity
+
+## Need help?
+
+- Run `/help` in the bot for quick reference
+- Check the [FAQ](/faq) for common questions
+- Review individual command pages for detailed usage
+- Contact support at `ops@zksend.app`

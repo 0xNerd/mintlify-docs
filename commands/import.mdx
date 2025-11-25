@@ -1,0 +1,65 @@
+---
+title: "/import"
+description: "Import an existing Solana wallet by providing its private key"
+---
+
+## Overview
+
+The `/import` command lets you import an existing Solana wallet into ZK Send by providing its private key. The key is immediately handed to Privy for secure re-encryption.
+
+## How it works
+
+1. **Send your private key**: Paste your base58-encoded private key in the chat
+2. **Auto-deletion**: The bot deletes the message immediately after parsing
+3. **Privy wrapping**: The key is passed to Privy for re-encryption in their TEE
+4. **Wallet activation**: The imported wallet becomes your active wallet
+
+<Warning>
+  Telegram may still store deleted messages for a short period. Use a secure clipboard, paste the key, and consider deleting your chat history afterward.
+</Warning>
+
+## Private key format
+
+The bot only accepts **base58-encoded** private keys. Common formats include:
+
+- Raw base58 string (32 bytes encoded)
+- Solana CLI keypair format (JSON with `secretKey` array)
+
+<Info>
+  If you have a keypair JSON file, extract the `secretKey` array and convert it to base58, or use the Solana CLI to export it in the correct format.
+</Info>
+
+## Security considerations
+
+- **Message auto-deletion**: The bot deletes your message immediately after parsing
+- **Privy custody**: Imported keys are wrapped by Privy, so custody remains in their TEE
+- **No logging**: The bot never logs raw private keys
+- **Blocklist check**: The wallet address is checked against `blocked_addresses` before import
+
+## Import limits
+
+You can import as many wallets as you need. Clean up unused wallets from `/wallets` to keep the list manageable.
+
+## After importing
+
+Once imported, the wallet will:
+
+- Appear in your `/wallets` list
+- Become your active wallet automatically
+- Be available for `/send` and `/balance` commands
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Invalid key format">
+    Ensure your private key is base58-encoded. If you have a JSON keypair, extract the `secretKey` array and convert it.
+  </Accordion>
+  <Accordion title="Import failed">
+    - Check that the key format is correct
+    - Verify you haven't hit the wallet limit
+    - Ensure the wallet address isn't on the blocklist
+  </Accordion>
+  <Accordion title="Message not deleted">
+    If the message wasn't auto-deleted, contact support immediately. The bot should delete it within seconds of parsing.
+  </Accordion>
+</AccordionGroup>

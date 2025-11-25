@@ -1,0 +1,71 @@
+---
+title: "Operations Runbook"
+description: "Day-2 guidance for keeping the ZK Send bot healthy"
+---
+
+## Monitoring
+
+| Signal | Source | Alert suggestion |
+| ------ | ------ | ---------------- |
+| Transfer throughput | Supabase `private_transfers` view | Alert if < 1 transfer in 10 minutes during peak |
+| Error rate | `transfer_errors` table + Grafana panel | Alert if >3% of sends fail in 5 minutes |
+| Job lag | `jobs_status` table | Alert if `retry-transfers` lag > 2 minutes |
+| Telegram webhook | `telegraf_webhook_health` metric | Alert if no webhook hits in 5 minutes during uptime |
+
+<Note>
+  Import `ops/grafana.json` for a plug-and-play dashboard with these panels.
+</Note>
+
+## Background jobs
+
+- `cleanup` removes expired Privacy Cash notes and stale Supabase rows.
+- `retry-transfers` replays failed withdrawals up to the configured limit.
+- `sync-balances` (optional) refreshes cached wallet balances on a cadence.
+
+Schedule jobs with your preferred orchestrator. We provide a thin wrapper:
+
+```bash
+npm run job cleanup
+npm run job retry-transfers -- --limit=50
+npm run job sync-balances
+```
+
+## Incident response
+
+1. **Triage**: Check Grafana alerts + Supabase error log.
+2. **Communicate**: Post status updates at `https://status.zksend.app` (linked in the docs navbar).
+3. **Mitigate**:
+   - Use `/wallets` to move users to healthy wallets if a specific account hits a Solana RPC issue.
+   - Replay stuck transfers with `npm run job retry-transfers -- --id=<transfer_id>`.
+   - Fail open by switching Privacy Cash endpoints via `PRIVACY_CASH_API_URL` env if the default region is degraded.
+4. **Postmortem**: Capture root cause, user impact, and follow-up actions in `postmortems/<date>.md`.
+
+## Supabase maintenance
+
+- Rotate `SUPABASE_SERVICE_KEY` every 90 days.
+- Vacuum the `transfer_logs` table weekly to keep storage under quotas.
+- Enable PITR (Point-in-time recovery) for production projects.
+
+## Deployment targets
+
+| Environment | Trigger | Notes |
+| ----------- | ------- | ----- |
+| Staging | Merge to `main` | Runs `npm run qa` + Telegram sandbox smoke tests |
+| Production | Git tag `v*` | Requires manual approval + final credential sync |
+
+<Warning>
+  Always rotate Telegram webhook secrets when promoting a new production build. This prevents older deployments from receiving updates inadvertently.
+</Warning>
+
+## Secrets management
+
+- Store `.env.production` in your CI/CD secret store (Railway, Fly, etc.).
+- Never expose Privy or Supabase keys in Telegram logs.
+- Enable `SECRET_SCANNER=true` to block accidental commits with leaked keys.
+
+## Support handoff checklist
+
+1. Verify bot is responsive with `/help`.
+2. Check last 10 entries in `transfer_errors`.
+3. Confirm background jobs executed within SLA.
+4. Update the on-call sheet in `ops/oncall.md`.

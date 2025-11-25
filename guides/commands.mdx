@@ -1,0 +1,85 @@
+---
+title: "Command Reference"
+description: "Every Telegram command the bot exposes and how it behaves"
+---
+
+## Overview
+
+| Command | Purpose | Notes |
+| ------- | ------- | ----- |
+| `/start` | Bootstraps the user session | Restores Privy + Supabase profile and lets new users keep or import a wallet inline |
+| `/balance` | Shows on-chain SOL balance for the active wallet | Pulls directly from the configured Solana RPC |
+| `/send` | Executes a Privacy Cash transfer | Handles deposit → proof → withdrawal in one flow |
+| `/wallets` | Lists, switches, or exports wallets | Inline keyboards show all linked Privy wallets |
+| `/import` | Imports an external Solana keypair | Message auto-deletes after parsing the key |
+| `/delete` | Soft-deletes the user profile | Privy data remains so users can return |
+| `/help` | Sends a condensed how-to message | Links back to docs and support |
+
+## `/start`
+
+1. Validates the Telegram user against Supabase.
+2. Restores the Privy session or creates a new embedded wallet.
+3. Offers wallet setup options so first-time users can keep the embedded wallet or paste an existing key without leaving `/start`.
+
+<Note>
+  `/start` is idempotent. Re-running it is the safest way for users to recover
+  from partial onboarding states.
+</Note>
+
+## `/balance`
+
+- Calls the Solana RPC endpoint defined via `SOLANA_RPC_URL`.
+- Respect the `BALANCE_CACHE_TTL` env to avoid overwhelming the RPC.
+- Inline keyboard includes "Refresh" to bust the cache when needed.
+
+## `/send`
+
+<Steps>
+<Step title="Collect amount">
+Users can choose preset buttons (`0.1`, `0.25`, `1` SOL) or type a custom amount. The `MAX` button pre-fills the total withdrawable balance minus fees.
+</Step>
+<Step title="Collect recipient">
+We validate the address format and optionally check against the blocklist stored in Supabase (`blocked_addresses`).
+</Step>
+<Step title="Transfer pipeline">
+1. Withdraw from the active Privy wallet to the Privacy Cash deposit address.
+2. Generate the proof + note hash via the Privacy Cash SDK.
+3. Submit the withdrawal to the recipient.
+4. Log the lifecycle in Supabase (`private_transfers`).
+</Step>
+</Steps>
+
+If any stage fails, we surface the error, persist it to `transfer_errors`, and attach a "Retry" button that replays from the failed stage.
+
+## `/wallets`
+
+- Lists every Privy wallet attached to the Telegram user.
+- Shows the currently active wallet + recent balances.
+- Supports `Activate`, `Export`, and `Delete` buttons per wallet.
+
+## `/import`
+
+- Accepts base58-encoded private keys only.
+- The message is deleted immediately after parsing to avoid leaking secrets.
+- Imported wallets are wrapped by Privy so custody remains in their TEE.
+
+<Warning>
+  Telegram may still store deleted messages for a short period. Encourage users
+  to paste from a secure clipboard and delete the chat history afterward.
+</Warning>
+
+## `/delete`
+
+- Marks the Supabase user row as `status = 'deleted'`.
+- Revokes active sessions and flushes any in-flight jobs.
+- Does **not** remove Privy data so users can return later without losing funds.
+
+## `/help`
+
+Sends:
+
+- A quick recap of supported commands
+- Link to `/getting-started` and `/commands/help`
+- Contact button pointing to `ops@zksend.app`
+
+Use this command whenever users enter free-form questions that the bot cannot parse.

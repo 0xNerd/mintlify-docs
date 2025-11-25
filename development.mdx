@@ -1,94 +1,113 @@
 ---
 title: 'Development'
-description: 'Preview changes locally to update your docs'
+description: 'How we build, test, and operate the ZK Send bot'
 ---
 
 <Info>
-  **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  **Stack** · Node.js 20 · TypeScript · Telegraf · Supabase · Privy · Privacy Cash SDK
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+## Local workflow
 
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Install dependencies">
 
 ```bash
-npm i -g mint
+npm install
 ```
+
 </Step>
-
-<Step title="Preview locally">
-
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+<Step title="Start the dev bot">
 
 ```bash
-mint dev
+npm run dev
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+Uses `ts-node-dev` to watch `src/**` and restart on change. The bot defaults to long polling locally; set `WEBHOOK_URL` to test webhook mode.
+
+</Step>
+<Step title="Run the SDK + bot build">
+
+```bash
+npm run build:sdk && npm run build
+```
+
+Builds the Privacy Cash SDK artifacts followed by the production bot bundle in `dist/`.
 
 </Step>
 </Steps>
 
-## Custom ports
+## Environment files
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+| File | Purpose |
+| ---- | ------- |
+| `.env` | Local development secrets, never committed |
+| `.env.production` | Optional file mounted in CI/CD for production deploys |
+| `env.example` | Source of truth for required keys + inline descriptions |
+
+Use `scripts/check-env.ts` (run via `npm run env:check`) to assert that required keys exist before deploy.
+
+## Database + migrations
+
+1. Update `src/database/schema.sql` when schema changes.
+2. Run `npm run db:push` to apply the SQL locally via Supabase CLI or `psql`.
+3. Commit both the SQL diff and any generated TypeScript types (if using `npm run types:generate`).
+
+<Warning>
+  Enable Row Level Security (RLS) and service role separation before shipping new tables.
+</Warning>
+
+## Testing + QA
+
+| Command | Description |
+| ------- | ----------- |
+| `npm test` | Unit tests for services, middleware, and helper utilities |
+| `npm run lint` | ESLint + TypeScript checks |
+| `npm run typecheck` | Standalone `tsc --noEmit` for CI |
+| `npm run qa` | Spins up the bot against a staging Supabase/Privy project and runs smoke scripts |
+
+<Note>
+  Telegram-specific flows are validated with Playwright scripts in `tests/e2e`. They rely on a seeded staging account and are skipped locally unless `E2E=true`.
+</Note>
+
+## Logging + monitoring
+
+- **Structured logs**: `pino` emits JSON logs with request IDs and command metadata.
+- **Supabase audit tables**: `wallet_activity`, `private_transfers`, and `errors` tables capture every state change.
+- **Alerts**: Use the provided Grafana dashboard JSON in `ops/grafana.json` to wire alerts for stuck transfers or error spikes.
+
+Set `LOG_PRETTY=true` for human-readable logs during development.
+
+## Background jobs
+
+- `jobs/cleanup.ts` prunes expired Privacy Cash notes.
+- `jobs/retry-transfers.ts` retries stuck withdrawals.
+- Schedule both via `npm run cron` or hook them into your orchestration platform (Temporal, Cloud Scheduler, etc.).
+
+Each job can also be invoked manually:
 
 ```bash
-mint dev --port 3333
+npm run job cleanup
+npm run job retry-transfers -- --limit=20
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+## Release checklist
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
-
-```bash
-npm mint update
-```
-
-## Validating links
-
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
-
-```bash
-mint broken-links
-```
-
-## Deployment
-
-If the deployment is successful, you should see the following:
-
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
-
-## Code formatting
-
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
-
-## Troubleshooting
+1. `npm run lint && npm run typecheck`
+2. `npm run test`
+3. `npm run build`
+4. `npm run qa` (staging smoke)
+5. Tag release and deploy via your chosen runner (Railway, Fly.io, etc.)
+6. Rotate any credentials that were re-issued during the release (Supabase keys, Privy secrets)
 
 <AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
+  <Accordion title="Troubleshooting Telegram webhooks">
+    - Verify the public HTTPS endpoint matches `WEBHOOK_URL`.
+    - Ensure the bot certificate is valid if you provide one.
+    - Run `npm run webhook:test` to send a sample update payload.
   </Accordion>
-
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
+  <Accordion title="Common Privacy Cash issues">
+    - Rebuild the SDK if typings drift: `npm run build:sdk`.
+    - Confirm the API key scope includes `transfer` + `withdraw`.
   </Accordion>
 </AccordionGroup>
-
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).

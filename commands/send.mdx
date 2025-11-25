@@ -1,0 +1,83 @@
+---
+title: "/send"
+description: "Send SOL privately using Privacy Cash zero-knowledge transfers"
+---
+
+## Overview
+
+The `/send` command executes a complete private transfer: it deposits SOL from your wallet into Privacy Cash, generates a zero-knowledge proof, and withdraws to your recipient—all in one flow.
+
+## How it works
+
+<Steps>
+<Step title="Choose amount">
+You can select from preset buttons (`0.1`, `0.25`, `1` SOL), enter a custom amount, or use the `MAX` button to send your entire withdrawable balance (minus fees).
+</Step>
+<Step title="Enter recipient">
+Provide the recipient's Solana wallet address. The bot validates the format and checks against the blocklist if configured.
+</Step>
+<Step title="Confirm transfer">
+Review the details and confirm. The bot will:
+1. Deposit from your active Privy wallet to Privacy Cash
+2. Generate the zero-knowledge proof and note hash
+3. Submit the withdrawal to the recipient
+4. Log the transaction in Supabase
+</Step>
+</Steps>
+
+## Amount options
+
+| Option | Description |
+| ------ | ----------- |
+| Preset buttons | Quick-select common amounts (0.1, 0.25, 1 SOL) |
+| Custom amount | Type any amount up to your available balance |
+| MAX | Automatically calculates max sendable (balance - fees) |
+
+<Warning>
+  Privacy Cash charges fees for deposits and withdrawals. The `MAX` option accounts for these fees automatically.
+</Warning>
+
+## Recipient validation
+
+The bot validates recipient addresses by:
+
+- Checking the Solana address format (base58, 32-44 characters)
+- Optionally checking against the `blocked_addresses` table in Supabase
+- Rejecting invalid or blocked addresses with a clear error message
+
+## Transfer lifecycle
+
+1. **Deposit**: SOL moves from your Privy wallet to Privacy Cash
+2. **Proof generation**: Privacy Cash SDK creates the zero-knowledge proof
+3. **Withdrawal**: Funds are withdrawn to the recipient address
+4. **Logging**: Transaction details saved to `private_transfers` table
+
+If any stage fails, the bot will:
+
+- Surface a clear error message
+- Persist the error to `transfer_errors` for debugging
+- Provide a "Retry" button to replay from the failed stage
+
+## Fees
+
+Privacy Cash charges fees for:
+
+- Depositing into the privacy pool
+- Generating zero-knowledge proofs
+- Withdrawing to recipients
+
+These fees are automatically deducted from your balance. The exact fee structure depends on Privacy Cash's current pricing.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Insufficient balance">
+    Check your balance with `/balance`. Remember that fees are deducted, so you need slightly more than the send amount.
+  </Accordion>
+  <Accordion title="Transfer stuck">
+    Use the "Retry" button if provided, or contact support with the transaction ID.
+  </Accordion>
+  <Accordion title="Invalid recipient address">
+    Double-check the address format. Solana addresses are base58-encoded and typically 32-44 characters long.
+  </Accordion>
+</AccordionGroup>

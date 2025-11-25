@@ -1,0 +1,57 @@
+---
+title: "/start"
+description: "Bootstrap your ZK Send account and restore your Privy wallet"
+---
+
+## Overview
+
+The `/start` command initializes your ZK Send session. It validates your Telegram account, restores or creates your Privy wallet, and guides you through the onboarding flow.
+
+## What it does
+
+1. **Validates your Telegram user** against the Supabase database
+2. **Restores your Privy session** if you're a returning user, or creates a new embedded wallet for new users
+3. **Walks you through wallet setup** so brand-new users can either keep the freshly generated embedded wallet or import an existing key inline
+
+<Note>
+  `/start` is idempotent. Re-running it is the safest way to recover from partial onboarding states or session issues.
+</Note>
+
+## For new users
+
+When you first run `/start`, the bot will:
+
+- Create your account in Supabase
+- Generate a new Privy embedded wallet
+- Offer a choice: keep the embedded Privy wallet that was just generated, or paste an existing private key via the inline import flow (the bot deletes the message after parsing).
+
+## For returning users
+
+If you've used ZK Send before, `/start` will:
+
+- Restore your existing Privy session
+- Reactivate your last active wallet
+- Show a welcome message with quick links to `/balance`, `/wallets`, and `/send`
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Bot says 'Account not found'">
+    This usually means your Telegram user ID isn't in Supabase. Try running `/start` again, or contact support if the issue persists.
+  </Accordion>
+  <Accordion title="Privy session expired">
+    The bot will automatically create a new session. Your wallets and transaction history remain intact.
+  </Accordion>
+  <Accordion title="Stuck in onboarding">
+    Run `/start` again to reset the onboarding state. If you're still stuck, use `/help` to contact support.
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+After running `/start`, you can:
+
+- Check your balance with `/balance`
+- Use `/import` later to add more wallets beyond what you configured during `/start`
+- View your wallets with `/wallets`
+- Send SOL privately with `/send`

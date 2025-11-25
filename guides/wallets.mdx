@@ -1,0 +1,64 @@
+---
+title: "Wallet Management"
+description: "How ZK Send handles Privy wallets, imports, and active wallet switching"
+---
+
+## Wallet lifecycle
+
+1. `/start` creates the primary embedded Privy wallet.
+2. Users can import additional wallets via `/import` (base58 secret keys only).
+3. `/wallets` displays every wallet and lets the user activate, export, or delete entries.
+4. Supabase persists the relationship in the `wallets` table with metadata such as label, last balance poll, and activation timestamp.
+
+## Active wallet switching
+
+- Exactly one wallet per user is marked `is_active`.
+- Switching wallets updates Supabase and refreshes cached balances.
+- Any in-flight `/send` flow references the active wallet snapshot that was captured at the start of the flow to avoid mid-transfer swaps.
+
+<Note>
+  The inline keyboard disables the "Activate" button for the wallet that is already active.
+</Note>
+
+## Imports
+
+| Step | Behavior |
+| ---- | -------- |
+| Validate | Check base58 format and compare against the `blocked_addresses` table. |
+| Wrap | Pass the private key to Privy so it can be re-encrypted inside their TEE. The bot never logs the secret. |
+| Persist | Store metadata (`label`, `source`, `created_at`) in Supabase. |
+| Notify | Confirm the import and surface `/send` as the next action. |
+
+<Warning>
+  Too many dormant wallets can become unmanageable. Encourage users to delete wallets they no longer use.
+</Warning>
+
+## Exports
+
+- For embedded wallets, we prompt the user to confirm before revealing the private key.
+- The key is sent as a self-destructing message (auto-delete interval controlled by `EXPORT_DELETE_SECONDS`).
+- Exports are logged with partial fingerprints so we can audit who accessed custody data.
+
+## Balance polling
+
+Balances are cached per wallet:
+
+```ts
+const cacheKey = `wallet:${userId}:${walletId}:balance`;
+```
+
+- The TTL defaults to 30 seconds but can be tuned via `BALANCE_CACHE_TTL`.
+- `/wallets` calls include a "Refresh" button to fetch live values.
+- We back off automatically if the Solana RPC rate limits us.
+
+## Deletions
+
+Deleting a wallet via `/wallets` results in:
+
+1. Marking the wallet as `deleted` in Supabase.
+2. Revoking access in Privy.
+3. Reassigning the active wallet to the primary embedded option if the deleted wallet was active.
+
+<Info>
+  We never hard-delete rows so audit history remains intact.
+</Info>
